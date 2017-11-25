@@ -1,0 +1,21 @@
+{
+   "name": "animate-compress-fills",
+   "main": "animate-compress-fills.js",
+   "version": "1.0.1",
+   "author": {
+      "url": "https://github.com/tpkn/"
+   },
+   "dependencies": {
+      "lodash": "latest",
+      "uglify-js": "latest"
+   },
+   "repository": "https://github.com/tpkn/animate-compress-fills",
+   "license": "MIT",
+   "keywords": [
+      "adobe",
+      "animate",
+      "compress",
+      "fill",
+      "color"
+   ]
+}
