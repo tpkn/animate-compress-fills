@@ -1,20 +1,21 @@
 {
-   "name": "animate-embed-images",
-   "main": "animate-embed-images.js",
-   "version": "1.0.2",
+   "name": "animate-compress-fills",
+   "main": "animate-compress-fills.js",
+   "version": "1.0.3",
    "author": {
       "url": "https://github.com/tpkn/"
    },
    "dependencies": {
-      "base64-img": "latest"
+      "lodash": "latest",
+      "uglify-js": "latest"
    },
-   "repository": "https://github.com/tpkn/animate-embed-images",
+   "repository": "https://github.com/tpkn/animate-compress-fills",
    "license": "MIT",
    "keywords": [
       "adobe",
       "animate",
-      "embed",
-      "images",
-      "base64"
+      "compress",
+      "fill",
+      "color"
    ]
 }

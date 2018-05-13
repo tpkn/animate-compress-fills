@@ -1,34 +1,38 @@
-# Animate. Embed Images
+# Animate. Compress Fills
 
-Module for Adobe Animate that inserts image assets inside js file
+Compresses strings that is inside the js file published from Adobe Animate
 
-Helpful stuff when you need to get single html without external files. Maybe some day Adobe will add this feature.
+When publishing a project, Adobe Animate creates a js file with a bunch of different information. The module searches for the same strings inside this js file and replaces them with variables.
 
-![preview](https://raw.githubusercontent.com/tpkn/animate-embed-images/master/preview.png)
+Keep in mind that compression algorithm is not yet 100% optimized.
+
+![preview](https://raw.githubusercontent.com/tpkn/animate-compress-fills/master/preview.png)
 
 
 ## Installation
 ```bash
-npm install animate-embed-images
+npm install animate-compress-fills
 ```
 
 
 ## Output example (part of...)
 ```javascript
-lib.properties = {
-   width: 300,
-   height: 500,
-   fps: 24,
-   color: "#FFFFFF",
-   opacity: 1.00,
-   webfonts: {},
-   manifest: [
-      {type:createjs.AbstractLoader.IMAGE, src:"data:image/png;base64, ... ", id:"Bitmap1"},
-      {type:createjs.AbstractLoader.IMAGE, src:"data:image/png;base64, ... ", id:"Bitmap2"},
-      {type:createjs.AbstractLoader.IMAGE, src:"data:image/jpg;base64, ... ", id:"Bitmap3"},
-   ],
-   preloads: []
-};
+// ------------------
+// Input
+// ------------------
+var mask_graphics_0 = new cjs.Graphics().p("EgEAA52MAAAhzrIIBAAMAAABzrg");
+var mask_graphics_1 = new cjs.Graphics().p("EgEAA52MAAAhzrIIBAAMAAABzrg");
+this.shape.graphics.f("#FFFFFF").s().p("ABNCMIAAh3IhFAAIgYAAIgPADIgKA");
+this.shape_1.graphics.f("#FFFFFF").s().p("ABNCMIAAh3IhFAAIgYAAIgPADIgKA");
+
+// ------------------
+// Output
+// ------------------
+var _1 = "EgEAA52MAAAhzrIIBAAMAAABzrg", _2 = "#FFFFFF", _3 = "ABNCMIAAh3IhFAAIgYAAIgPADIgKA";
+var mask_graphics_0 = new cjs.Graphics().p(_1);
+var mask_graphics_1 = new cjs.Graphics().p(_1);
+this.shape.graphics.f(_2).s().p(_3);
+this.shape_1.graphics.f(_2).s().p(_3);
 ```
 
 ## Usage
@@ -36,67 +40,96 @@ lib.properties = {
 const path = require('path');
 const glob = require('glob');
 const chalk = require('chalk');
+const lodash = require('lodash');
 const {table, getBorderCharacters} = require('table');
-const AnimateEmbedImages = require('animate-embed-images');
+const AnimateCompressFills = require('animate-compress-fills');
 
-glob('test/**/!(*.b64).js', (err, files) => {
+glob('test/**/!(*.cmp).js', (err, files) => {
    for(let i = 0, len = files.length; i < len; i++){
+
       let js_file = path.join(__dirname, files[i]);
       
-      new AnimateEmbedImages(js_file, js_file.replace(/\.(js|html?)$/i, '.b64.$1'))
+      new AnimateCompressFills(js_file, js_file.replace(/\.js$/i, '.cmp.js'), random(0, 1))
       .then(data => {
-         let table_data = [[chalk.white.bold('N'), chalk.white.bold('SIZE (base64)'), chalk.white.bold('FILE')]];
-         let diff_summ = 0;
-         for(let i = 0, len = data.images.length; i < len; i++){
-            let file = data.images[i];
-            let diff = file.b64_size / 1024 || 0;
-            diff_summ += diff;
+         let table_data = [[chalk.white.bold('N'), chalk.white.bold('COMPRESSED'), chalk.white.bold('UGLIFIED'), chalk.white.bold('SIZE')]];
 
-            table_data.push([i + 1, chalk.yellow.bold(diff.toFixed(3) + ' KB'), file.name]);
-         }
+         let size = toKB(data.size.source);
+         let size_compressed = toKB(data.size.compressed);
+         let size_uglified = toKB(data.size.uglified);
+
+         let diff = (size_compressed - size).toFixed(3) || 0;
+         let percent = (diff / size * 100).toFixed(3);
+         let compressed_str = numSign(diff);
+         let compressed_perc = numPerc(percent);
+
+         let diff2 = (size_uglified - size).toFixed(3) || 0;
+         let percent2 = (diff2 / size * 100).toFixed(3);
+         let uglified_str = size_uglified == 0 ? 'disabled' : numSign(diff2);
+         let uglified_perc = size_uglified == 0 ? '' : numPerc(percent2);
+         
+         table_data.push([i + 1, compressed_str + '  ' + compressed_perc, uglified_str + '  ' + uglified_perc, (size).toFixed(3) + ' KB']);
 
          console.log('');
-         console.log(' ' + chalk.white.bgGreen.bold(' ' + data.message + ': '), chalk.white.bgBlue.bold(' +' + (diff_summ).toFixed(3) + ' KB '), path.basename(data.input_file));
-         console.log(table(table_data, {columns: {0: {width: 3}, 1: {width: 15}, 2: {width: 50, truncate: 50}}, border: getBorderCharacters('ramac')}));
+         if(data.status == 'skip'){
+            console.log(' ' + chalk.white.bgMagenta.bold(' ' + data.message + ': '), path.basename(data.input_file));
+         }else{
+            console.log(' ' + chalk.white.bgGreen.bold(' ' + data.message + ': '), path.basename(data.input_file));
+         }
+         console.log(table(table_data, {columns: {0: {width: 3}, 1: {width: 25}, 2: {width: 25}, 3: {width: 11}}, border: getBorderCharacters('ramac')}));
       })
-      .catch(data => {
-         let table_data = [[chalk.white.bold('N'), chalk.white.bold('SIZE'), chalk.white.bold('FILE')]];
-         for(let i = 0, len = data.images.length; i < len; i++){
-            let file = data.images[i];
-            table_data.push([i + 1, '-', chalk.red.bold(file.name)]);
-         }
-
-         console.log('');
-         console.log(' ' + chalk.white.bgMagenta.bold(' ' + data.message + ': '), path.basename(data.input_file));
-         console.log(table(table_data, {columns: {0: {width: 3}, 1: {width: 15}, 2: {width: 50, truncate: 50}}, border: getBorderCharacters('ramac')}));
-      });
+      .catch(err => {
+         console.log(err);
+      })
    }
 });
-```
 
+function random(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function toKB(n){
+   return n / 1024 || 0;
+}
+
+function numSign(n){
+   if(n > 0){
+      return chalk.red.bold('+' + n + ' KB');
+   }else if(n < 0){
+      return chalk.green.bold(n + ' KB');
+   }else{
+      return '0 KB';
+   }
+}
+
+function numPerc(p){
+   if(p > 0){
+      return chalk.white.bgRed.bold(' +' + p + ' % ');
+   }else if(p < 0){
+      return chalk.white.bgGreen.bold(' ' + p + ' % ');
+   }else{
+      return '0 %';
+   }
+}
+
+```
 
 Callback data structure:
 ```code
 {
-   status         -> {String} 'ok' or 'fail'
+   status         -> {String} 'ok', 'fail' or 'skip' if it's pointless to compress
    message        -> {String} Any text describing status
    input_file     -> {String} Source js file path
    output_file    -> {String} Output js file path
    js_content     -> {String} Modified js content
-   images: [
-      {
-         name     -> {String} Image file name
-         path     -> {String} Image path
-         exist    -> {Number} 0 - if image does not exist
-         size     -> {Number} Image file size (bytes)
-         b64_size -> {Number} The size of the image in base64 format (bytes)
-      }
-   ]
+   size: {
+      source       -> {Number} Original size
+      compressed   -> {Number} When fills are compressed
+      uglified     -> {Number} And when all uglified
+   }
 }
 ```
 
-
-## Changelog 
-#### 2018-01-17:
-- Removed images sorting. That was just for cosmetic purposes at the debug stage.
-
+Additionally you can compress the whole file using UglifyJS:
+```javascript
+new AnimateCompressFills(input_file, output_file, true);
+```
