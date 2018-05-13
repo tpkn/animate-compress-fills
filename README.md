@@ -9,6 +9,12 @@ Keep in mind that compression algorithm is not yet 100% optimized.
 ![preview](https://raw.githubusercontent.com/tpkn/animate-compress-fills/master/preview.png)
 
 
+## Installation
+```bash
+npm install animate-compress-fills
+```
+
+
 Callback data structure:
 ```code
 {
