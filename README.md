@@ -15,22 +15,6 @@ npm install animate-compress-fills
 ```
 
 
-Callback data structure:
-```code
-{
-   status         -> {String} 'ok', 'fail' or 'skip' if it's pointless to compress
-   message        -> {String} Any text describing status
-   input_file     -> {String} Source js file path
-   output_file    -> {String} Output js file path
-   js_content     -> {String} Modified js content
-   size: {
-      source       -> {Number} Original size
-      compressed   -> {Number} When fills are compressed
-      uglified     -> {Number} And when all uglified
-   }
-}
-```
-
 ## Output example (part of...)
 ```javascript
 // ------------------
@@ -127,6 +111,22 @@ function numPerc(p){
    }
 }
 
+```
+
+Callback data structure:
+```code
+{
+   status         -> {String} 'ok', 'fail' or 'skip' if it's pointless to compress
+   message        -> {String} Any text describing status
+   input_file     -> {String} Source js file path
+   output_file    -> {String} Output js file path
+   js_content     -> {String} Modified js content
+   size: {
+      source       -> {Number} Original size
+      compressed   -> {Number} When fills are compressed
+      uglified     -> {Number} And when all uglified
+   }
+}
 ```
 
 Additionally you can compress the whole file using UglifyJS:
