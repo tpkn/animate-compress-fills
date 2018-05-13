@@ -1,5 +1,5 @@
 /*!
- * Animate Compress Fills (v1.0.1.20171112), http://tpkn.me/
+ * Animate Compress Fills, http://tpkn.me/
  */
 
 const fs = require('fs');
